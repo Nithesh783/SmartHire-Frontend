@@ -1,36 +1,57 @@
 import { useState } from "react";
 import axios from "axios";
 
-function LoginPage({ role, setEmail, setIsLoggedIn, setRole, setAuthMode }) {
+function LoginPage({
+  role,
+  setEmail,
+  setIsLoggedIn,
+  setRole,
+  setAuthMode,
+}) {
   const [emailInput, setEmailInput] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     setError("");
 
+    if (!emailInput || !password) {
+      setError("Please enter email and password");
+      return;
+    }
+
     try {
-      const res = await axios.post("http://localhost:8080/auth/login", {
-        email: emailInput,
-        password,
-      });
+      setLoading(true);
 
-      const token = res.data.token;
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/auth/login`,
+        {
+          email: emailInput,
+          password,
+        }
+      );
 
-      // Decode JWT payload (simple way)
-      const payload = JSON.parse(atob(token.split(".")[1]));
-
-      const userRole = payload.role; // must match backend
-
-      // 🚫 BLOCK WRONG ROLE LOGIN
-      if (userRole !== role) {
-        setError(`You are registered as ${userRole}, not ${role}`);
+      if (!res.data.success) {
+        setError(res.data.message);
+        setLoading(false);
         return;
       }
 
-      // ✅ STORE DATA
+      const token = res.data.token;
+      const userRole = res.data.role;
+
+      // 🚫 Prevent wrong role login
+      if (userRole !== role) {
+        setError(`You are registered as ${userRole}, not ${role}`);
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Store login data
       localStorage.setItem("token", token);
       localStorage.setItem("email", emailInput);
+      localStorage.setItem("role", userRole);
 
       setEmail(emailInput);
       setIsLoggedIn(true);
@@ -38,21 +59,34 @@ function LoginPage({ role, setEmail, setIsLoggedIn, setRole, setAuthMode }) {
     } catch (err) {
       setError("Invalid email or password");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div style={container}>
       <div style={card}>
-  <img
-    src="/logo.png"
-    alt="logo"
-    style={{ width: "60px", margin: "0 auto" }}
-  />
-  <h3>{role} Login</h3>
+
+        <div style={{ textAlign: "center" }}>
+          <img
+            src="/logo.png"
+            alt="logo"
+            style={{ width: "70px", marginBottom: "10px" }}
+          />
+
+          <h2 style={{ marginBottom: "5px" }}>
+            {role} Login
+          </h2>
+
+          <p style={{ color: "#6b7280", fontSize: "14px" }}>
+            Welcome back to SmartHire AI
+          </p>
+        </div>
 
         <input
           style={input}
+          type="email"
           placeholder="Email"
           value={emailInput}
           onChange={(e) => setEmailInput(e.target.value)}
@@ -66,13 +100,31 @@ function LoginPage({ role, setEmail, setIsLoggedIn, setRole, setAuthMode }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && (
+          <p style={{ color: "#dc2626", fontSize: "14px" }}>
+            {error}
+          </p>
+        )}
 
-        <button style={button} onClick={handleLogin}>
-          Login
+        <button
+          style={button}
+          onClick={handleLogin}
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Login"}
         </button>
 
-        <button style={secondary} onClick={() => setRole("")}>
+        <button
+          style={secondary}
+          onClick={() => setAuthMode("REGISTER")}
+        >
+          New User? Register
+        </button>
+
+        <button
+          style={secondary}
+          onClick={() => setRole("")}
+        >
           Change Role
         </button>
 
@@ -85,12 +137,12 @@ function LoginPage({ role, setEmail, setIsLoggedIn, setRole, setAuthMode }) {
         >
           Home
         </button>
+
       </div>
     </div>
   );
 }
 
-// styles
 const container = {
   minHeight: "100vh",
   display: "flex",
@@ -100,28 +152,33 @@ const container = {
 };
 
 const card = {
-  background: "#fff",
+  background: "#ffffff",
   padding: "40px",
-  borderRadius: "16px",
+  borderRadius: "18px",
   width: "400px",
   display: "flex",
   flexDirection: "column",
   gap: "16px",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
 };
 
 const input = {
-  padding: "12px",
+  padding: "14px",
   borderRadius: "10px",
-  border: "1px solid #ccc",
+  border: "1px solid #d1d5db",
+  fontSize: "15px",
+  outline: "none",
 };
 
 const button = {
-  padding: "12px",
+  padding: "14px",
   borderRadius: "10px",
   background: "#4f46e5",
   color: "white",
   border: "none",
+  cursor: "pointer",
+  fontWeight: "600",
+  fontSize: "15px",
 };
 
 const secondary = {

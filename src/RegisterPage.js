@@ -8,11 +8,13 @@ function RegisterPage({ role, setAuthMode }) {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
     setError("");
     setSuccess("");
 
+    // ✅ validations
     if (!name || !email || !password) {
       setError("All fields are required");
       return;
@@ -29,15 +31,21 @@ function RegisterPage({ role, setAuthMode }) {
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/auth/register", {
-        name,
-        email,
-        password,
-        role,
-      });
+      setLoading(true);
+
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/auth/register`,
+        {
+          name,
+          email,
+          password,
+          role,
+        }
+      );
 
       if (!res.data.success) {
         setError(res.data.message);
+        setLoading(false);
         return;
       }
 
@@ -50,6 +58,8 @@ function RegisterPage({ role, setAuthMode }) {
     } catch (err) {
       setError("Registration failed");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,23 +67,32 @@ function RegisterPage({ role, setAuthMode }) {
     <div style={container}>
       <div style={card}>
 
-        <img
-          src={process.env.PUBLIC_URL + "/logo.png"}
-          alt="logo"
-          style={{ width: "60px", margin: "0 auto" }}
-        />
+        <div style={{ textAlign: "center" }}>
+          <img
+            src="/logo.png"
+            alt="logo"
+            style={{ width: "70px", marginBottom: "10px" }}
+          />
 
-        <h3 style={{ textAlign: "center" }}>{role} Register</h3>
+          <h2 style={{ marginBottom: "5px" }}>
+            {role} Register
+          </h2>
+
+          <p style={{ color: "#6b7280", fontSize: "14px" }}>
+            Create your SmartHire AI account
+          </p>
+        </div>
 
         <input
           style={input}
-          placeholder="Name"
+          placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <input
           style={input}
+          type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -87,28 +106,44 @@ function RegisterPage({ role, setAuthMode }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {success && <p style={{ color: "green" }}>{success}</p>}
+        {error && (
+          <p style={{ color: "#dc2626", fontSize: "14px" }}>
+            {error}
+          </p>
+        )}
 
-        <button style={button} onClick={handleRegister}>
-          Register
+        {success && (
+          <p style={{ color: "#16a34a", fontSize: "14px" }}>
+            {success}
+          </p>
+        )}
+
+        <button
+          style={button}
+          onClick={handleRegister}
+          disabled={loading}
+        >
+          {loading ? "Registering..." : "Register"}
         </button>
 
-        <button style={secondary} onClick={() => setAuthMode("LOGIN")}>
+        <button
+          style={secondary}
+          onClick={() => setAuthMode("LOGIN")}
+        >
           Already have account? Login
         </button>
 
-        <button style={secondary} onClick={() => setAuthMode("")}>
+        <button
+          style={secondary}
+          onClick={() => setAuthMode("")}
+        >
           Home
         </button>
+
       </div>
     </div>
   );
 }
-
-export default RegisterPage;
-
-// ✅ styles (valid JS now)
 
 const container = {
   minHeight: "100vh",
@@ -119,32 +154,38 @@ const container = {
 };
 
 const card = {
-  background: "#fff",
+  background: "#ffffff",
   padding: "40px",
-  borderRadius: "16px",
+  borderRadius: "18px",
   width: "400px",
   display: "flex",
   flexDirection: "column",
-  gap: "14px",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+  gap: "16px",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
 };
 
 const input = {
-  padding: "12px",
+  padding: "14px",
   borderRadius: "10px",
-  border: "1px solid #ccc",
+  border: "1px solid #d1d5db",
+  fontSize: "15px",
+  outline: "none",
 };
 
 const button = {
-  padding: "12px",
+  padding: "14px",
   borderRadius: "10px",
   background: "#4f46e5",
   color: "white",
   border: "none",
   cursor: "pointer",
+  fontWeight: "600",
+  fontSize: "15px",
 };
 
 const secondary = {
   ...button,
   background: "#9ca3af",
 };
+
+export default RegisterPage;
