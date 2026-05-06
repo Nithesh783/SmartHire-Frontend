@@ -1,142 +1,96 @@
 import { useState } from "react";
-import axios from "axios";
+import LoginPage from "./LoginPage";
+import RegisterPage from "./RegisterPage";
+import CandidateDashboard from "./CandidateDashboard";
+import RecruiterDashboard from "./RecruiterDashboard";
 
 function App() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [authMode, setAuthMode] = useState("");
+  const [role, setRole] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [resume, setResume] = useState(null);
-  const [uploadMessage, setUploadMessage] = useState("");
-  const [skills, setSkills] = useState("");
+  const [email, setEmail] = useState("");
+  const [recruiterPage, setRecruiterPage] = useState("HOME");
 
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post("http://localhost:8080/auth/login", {
-        email: email,
-        password: password,
-      });
-
-      localStorage.setItem("token", response.data.token);
-
-      alert(response.data.message);
-
-      setIsLoggedIn(true);
-
-    } catch (error) {
-      alert("Login failed");
-      console.error(error);
-    }
+  const container = {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#eef2f7",
+    fontFamily: "Inter, sans-serif",
   };
 
-  const handleResumeUpload = async () => {
-    if (!resume) {
-      alert("Please select a resume");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", resume);
-
-    try {
-      const response = await axios.post(
-        `http://localhost:8080/candidate/upload-resume?email=${email}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setUploadMessage(
-        response.data.message + " | File: " + response.data.fileName
-      );
-
-      setSkills(response.data.skills);
-
-    } catch (error) {
-      alert("Resume upload failed");
-      console.error(error);
-    }
+  const card = {
+    background: "#fff",
+    padding: "40px",
+    borderRadius: "16px",
+    width: "420px",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    textAlign: "center",
   };
 
-  if (isLoggedIn) {
+  const button = {
+    padding: "12px",
+    borderRadius: "10px",
+    border: "none",
+    background: "#4f46e5",
+    color: "white",
+    cursor: "pointer",
+  };
+
+  if (!authMode) {
     return (
-      <div style={{ textAlign: "center", marginTop: "100px" }}>
-        <h1>Welcome Candidate</h1>
-        <h2>Login Successful</h2>
-        <p>Your SmartHire dashboard is ready.</p>
-
-        <div style={{ marginTop: "30px" }}>
-          <input
-            type="file"
-            accept=".pdf"
-            onChange={(e) => setResume(e.target.files[0])}
-          />
-
-          <br /><br />
-
-          <button onClick={handleResumeUpload} style={{ padding: "10px 20px" }}>
-            Upload Resume
-          </button>
-
-          <p style={{ marginTop: "20px" }}>{uploadMessage}</p>
-
-          {skills && (
-            <div style={{ marginTop: "20px" }}>
-              <h3>Extracted Skills:</h3>
-              <p>{skills}</p>
-            </div>
-          )}
+      <div style={container}>
+       <div style={card}>
+  <img
+    src="/logo.png"
+    alt="logo"
+    style={{ width: "70px", margin: "0 auto" }}
+  />
+  <h2>SmartHire AI</h2>
+          <button style={button} onClick={() => setAuthMode("LOGIN")}>Login</button>
+          <button style={button} onClick={() => setAuthMode("REGISTER")}>Register</button>
         </div>
-
-        <br />
-
-        <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            setIsLoggedIn(false);
-          }}
-          style={{ padding: "10px 20px", marginTop: "20px" }}
-        >
-          Logout
-        </button>
       </div>
     );
   }
 
-  return (
-    <div style={{ textAlign: "center", marginTop: "100px" }}>
-      <h1>SmartHire AI</h1>
-      <h2>Candidate Login</h2>
-
-      <div style={{ marginTop: "30px" }}>
-        <input
-          type="email"
-          placeholder="Enter Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ padding: "10px", width: "250px", marginBottom: "15px" }}
-        />
-
-        <br />
-
-        <input
-          type="password"
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ padding: "10px", width: "250px", marginBottom: "20px" }}
-        />
-
-        <br />
-
-        <button onClick={handleLogin} style={{ padding: "10px 20px" }}>
-          Login
-        </button>
+  if (!role) {
+    return (
+      <div style={container}>
+        <div style={card}>
+          <h3>Select Role</h3>
+          <button style={button} onClick={() => setRole("CANDIDATE")}>Candidate</button>
+          <button style={button} onClick={() => setRole("RECRUITER")}>Recruiter</button>
+          <button style={{ ...button, background: "#9ca3af" }} onClick={() => setAuthMode("")}>Back</button>
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  if (authMode === "REGISTER") {
+    return <RegisterPage role={role} setAuthMode={setAuthMode} setRole={setRole} />;
+  }
+
+  if (!isLoggedIn) {
+    return <LoginPage role={role} setEmail={setEmail} setIsLoggedIn={setIsLoggedIn} setRole={setRole} setAuthMode={setAuthMode} />;
+  }
+
+  if (role === "CANDIDATE") {
+    return <CandidateDashboard email={email} setIsLoggedIn={setIsLoggedIn} setRole={setRole} />;
+  }
+
+  return (
+    <RecruiterDashboard
+      email={email}
+      setIsLoggedIn={setIsLoggedIn}
+      setRole={setRole}
+      recruiterPage={recruiterPage}
+      setRecruiterPage={setRecruiterPage}
+    />
   );
 }
 
