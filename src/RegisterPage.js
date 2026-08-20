@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "./api";
 
 function RegisterPage({ role, setAuthMode }) {
   const [name, setName] = useState("");
@@ -33,8 +33,8 @@ function RegisterPage({ role, setAuthMode }) {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/register`,
+      const res = await api.post(
+        `/auth/register`,
         {
           name,
           email,
@@ -56,7 +56,7 @@ function RegisterPage({ role, setAuthMode }) {
       }, 1500);
 
     } catch (err) {
-      setError("Registration failed");
+      setError(err.response?.data?.message || "Registration failed");
       console.error(err);
     } finally {
       setLoading(false);
@@ -64,62 +64,55 @@ function RegisterPage({ role, setAuthMode }) {
   };
 
   return (
-    <div style={container}>
-      <div style={card}>
+    <div className="sh-page">
+      <div className="sh-shell narrow sh-card sh-form">
 
-        <div style={{ textAlign: "center" }}>
-          <img
+        <div className="sh-center">
+          <div className="sh-brand center"><img
             src="/logo.png"
             alt="logo"
-            style={{ width: "70px", marginBottom: "10px" }}
-          />
+            className="sh-page-logo"
+          /> SmartHire AI</div>
 
-          <h2 style={{ marginBottom: "5px" }}>
-            {role} Register
-          </h2>
+          <h2 className="sh-heading">Create your account</h2>
 
-          <p style={{ color: "#6b7280", fontSize: "14px" }}>
-            Create your SmartHire AI account
-          </p>
+          <p className="sh-subtitle">Join as a {role.toLowerCase()}.</p>
         </div>
 
-        <input
-          style={input}
+        <div className="sh-field"><label htmlFor="register-name">Full name</label><input id="register-name"
           placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-        />
+        /></div>
 
-        <input
-          style={input}
+        <div className="sh-field"><label htmlFor="register-email">Email address</label><input id="register-email"
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-        />
+        /></div>
 
-        <input
-          style={input}
+        <div className="sh-field"><label htmlFor="register-password">Password</label><input id="register-password"
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-        />
+        /></div>
 
         {error && (
-          <p style={{ color: "#dc2626", fontSize: "14px" }}>
+          <p className="sh-alert">
             {error}
           </p>
         )}
 
         {success && (
-          <p style={{ color: "#16a34a", fontSize: "14px" }}>
+          <p className="sh-alert success">
             {success}
           </p>
         )}
 
         <button
-          style={button}
+          className="sh-btn primary"
           onClick={handleRegister}
           disabled={loading}
         >
@@ -127,14 +120,14 @@ function RegisterPage({ role, setAuthMode }) {
         </button>
 
         <button
-          style={secondary}
+          className="sh-btn secondary"
           onClick={() => setAuthMode("LOGIN")}
         >
           Already have account? Login
         </button>
 
         <button
-          style={secondary}
+          className="sh-btn secondary"
           onClick={() => setAuthMode("")}
         >
           Home
@@ -144,48 +137,4 @@ function RegisterPage({ role, setAuthMode }) {
     </div>
   );
 }
-
-const container = {
-  minHeight: "100vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  background: "#eef2f7",
-};
-
-const card = {
-  background: "#ffffff",
-  padding: "40px",
-  borderRadius: "18px",
-  width: "400px",
-  display: "flex",
-  flexDirection: "column",
-  gap: "16px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-};
-
-const input = {
-  padding: "14px",
-  borderRadius: "10px",
-  border: "1px solid #d1d5db",
-  fontSize: "15px",
-  outline: "none",
-};
-
-const button = {
-  padding: "14px",
-  borderRadius: "10px",
-  background: "#4f46e5",
-  color: "white",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "600",
-  fontSize: "15px",
-};
-
-const secondary = {
-  ...button,
-  background: "#9ca3af",
-};
-
 export default RegisterPage;

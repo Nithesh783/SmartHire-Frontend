@@ -31,47 +31,21 @@ function App() {
 
   }, []);
 
+  useEffect(() => {
+    const handleLogout = () => {
+      setIsLoggedIn(false);
+      setRole("");
+      setEmail("");
+      setAuthMode("LOGIN");
+    };
+
+    window.addEventListener("smarthire:logout", handleLogout);
+    return () => window.removeEventListener("smarthire:logout", handleLogout);
+  }, []);
+
   // =========================
   // styles
   // =========================
-
-  const container = {
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#eef2f7",
-    padding: "20px",
-    fontFamily: "Inter, sans-serif",
-  };
-
-  const card = {
-    width: "420px",
-    background: "#ffffff",
-    borderRadius: "20px",
-    padding: "40px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "18px",
-    textAlign: "center",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-  };
-
-  const button = {
-    padding: "14px",
-    borderRadius: "12px",
-    border: "none",
-    background: "#4f46e5",
-    color: "white",
-    fontSize: "15px",
-    fontWeight: "600",
-    cursor: "pointer",
-  };
-
-  const secondaryButton = {
-    ...button,
-    background: "#9ca3af",
-  };
 
   // =========================
   // HOME PAGE
@@ -80,56 +54,10 @@ function App() {
   if (!authMode && !isLoggedIn) {
 
     return (
-      <div style={container}>
-        <div style={card}>
-
-          <div>
-
-            <img
-              src="/logo.png"
-              alt="logo"
-              style={{
-                width: "80px",
-                marginBottom: "15px",
-              }}
-            />
-
-            <h1
-              style={{
-                marginBottom: "10px",
-                color: "#111827",
-              }}
-            >
-              SmartHire AI
-            </h1>
-
-            <p
-              style={{
-                color: "#6b7280",
-                fontSize: "15px",
-              }}
-            >
-              AI-powered recruitment and resume screening platform
-            </p>
-
-          </div>
-
-          <button
-            style={button}
-            onClick={() => setAuthMode("LOGIN")}
-          >
-            Login
-          </button>
-
-          <button
-            style={button}
-            onClick={() => setAuthMode("REGISTER")}
-          >
-            Register
-          </button>
-
-        </div>
-      </div>
+      <div className="sh-page"><div className="sh-shell sh-home-grid">
+        <section><div className="sh-brand"><img src="/logo.png" alt="SmartHire" /> SmartHire AI</div><div className="sh-eyebrow sh-section">Recruitment workspace</div><h1 className="sh-title">Build better teams with less friction.</h1><p className="sh-subtitle">Manage resumes, opportunities, candidate matching, and applications in one focused workspace.</p><div className="sh-actions"><button className="sh-btn primary" onClick={() => setAuthMode("LOGIN")}>Sign in to workspace</button><button className="sh-btn secondary" onClick={() => setAuthMode("REGISTER")}>Create an account</button></div></section>
+        <section className="sh-card"><div className="sh-features"><div className="sh-feature"><strong>Resume hub</strong><span>Upload and review extracted candidate skills.</span></div><div className="sh-feature"><strong>Job workspace</strong><span>Create and organize recruiter opportunities.</span></div><div className="sh-feature"><strong>Skill matching</strong><span>Compare candidates with clear deterministic scores.</span></div><div className="sh-feature"><strong>Application tracking</strong><span>Follow candidate application status in one place.</span></div></div></section>
+      </div></div>
     );
   }
 
@@ -140,56 +68,7 @@ function App() {
   if (!role && !isLoggedIn) {
 
     return (
-      <div style={container}>
-        <div style={card}>
-
-          <div>
-
-            <img
-              src="/logo.png"
-              alt="logo"
-              style={{
-                width: "70px",
-                marginBottom: "10px",
-              }}
-            />
-
-            <h2>Select Your Role</h2>
-
-            <p
-              style={{
-                color: "#6b7280",
-                fontSize: "14px",
-              }}
-            >
-              Choose how you want to continue
-            </p>
-
-          </div>
-
-          <button
-            style={button}
-            onClick={() => setRole("CANDIDATE")}
-          >
-            Candidate
-          </button>
-
-          <button
-            style={button}
-            onClick={() => setRole("RECRUITER")}
-          >
-            Recruiter
-          </button>
-
-          <button
-            style={secondaryButton}
-            onClick={() => setAuthMode("")}
-          >
-            Back
-          </button>
-
-        </div>
-      </div>
+      <div className="sh-page"><div className="sh-shell narrow sh-card"><div className="sh-brand center"><img src="/logo.png" alt="SmartHire" /> SmartHire AI</div><h2 className="sh-heading">Choose your workspace</h2><p className="sh-subtitle">Select a role to continue.</p><div className="sh-actions"><button className="sh-btn primary" onClick={() => setRole("CANDIDATE")}>I’m a Candidate</button><button className="sh-btn primary" onClick={() => setRole("RECRUITER")}>I’m a Recruiter</button><button className="sh-btn secondary" onClick={() => setAuthMode("")}>Back home</button></div></div></div>
     );
   }
 
